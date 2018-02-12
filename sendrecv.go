@@ -153,7 +153,7 @@ func (d *Dataset) SendOne(FromName string, outf *os.File, flags *SendFlags) (err
 	}
 	ctoname = C.CString(path.Base(dpath))
 	defer C.free(unsafe.Pointer(ctoname))
-	cerr := C.zfs_send_one(d.list.zh, cfromname, C.int(outf.Fd()), lzc_send_flags)
+	cerr := C.zfs_send_one(d.list.zh, cfromname, C.int(outf.Fd()), *to_sendflags_t(flags))
 	if cerr != 0 {
 		err = LastError()
 	}
@@ -261,7 +261,7 @@ func (d *Dataset) Receive(inf *os.File, flags RecvFlags) (err error) {
 	defer C.free(unsafe.Pointer(cflags))
 	dest := C.CString(dpath)
 	defer C.free(unsafe.Pointer(dest))
-	ec := C.zfs_receive(C.libzfsHandle, dest, cflags, C.int(inf.Fd()), nil)
+	ec := C.zfs_receive(C.libzfsHandle, dest, props, cflags, C.int(inf.Fd()), nil)
 	if ec != 0 {
 		err = fmt.Errorf("ZFS receive of %s failed. %s", C.GoString(dest), LastError().Error())
 	}
